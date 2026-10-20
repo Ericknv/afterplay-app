@@ -4025,16 +4025,81 @@ body {
     }
 }
 
+/* --------------------------------------------------------------------------
+   20. RESPONSIVIDADE COMPLETA E POLIMENTO MÓVEL (MEDIA QUERIES)
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+    .brand-hero-grid {
+        grid-template-columns: 1fr;
+        gap: 36px;
+        min-height: auto;
+        padding-top: 20px;
+    }
+
+    .hero-main-title {
+        font-size: 2.2rem;
+    }
+
+    .hero-turntable-stage {
+        width: 300px;
+        height: 300px;
+    }
+
+    .hero-vinyl-disc {
+        width: 280px;
+        height: 280px;
+    }
+
+    .gatefold-card-box {
+        grid-template-columns: 1fr;
+    }
+
+    .encartes-5col-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stats-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .analytics-panels-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-studio-workspace {
+        flex-direction: column;
+    }
+
+    .card-controls-panel {
+        width: 100%;
+    }
+}
+
+@media (max-width: 860px) {
+    .needle-deck-body {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .needle-action-col {
+        max-width: 100%;
+    }
+
+    .needle-result-card {
+        padding: 14px;
+    }
+}
+
 @media (max-width: 640px) {
-    /* Cabeçalho: Oculta a busca central no mobile para desobstruir o topo */
+    /* Cabeçalho com respiro */
     .studio-header {
-        padding: 10px 14px;
-        padding-left: max(14px, var(--safe-left));
-        padding-right: max(14px, var(--safe-right));
+        padding: 12px 20px;
+        padding-left: max(20px, var(--safe-left));
+        padding-right: max(20px, var(--safe-right));
     }
 
     .header-center {
-        display: none; /* A busca rápida completa continua disponível no drawer e na aba 'O Acervo' */
+        display: none;
     }
 
     .brand-name {
@@ -4043,17 +4108,37 @@ body {
     }
 
     .status-btn {
-        padding: 6px 10px;
-        font-size: 0.68rem;
+        padding: 6px 12px;
+        font-size: 0.7rem;
     }
 
-    /* Conteúdo Principal */
+    /* Margem lateral geral ampliada para 20px (não cola mais nas bordas) */
     .studio-main-content {
-        padding: 12px 14px 90px 14px;
+        padding: 20px 20px 100px 20px;
+        padding-left: max(20px, var(--safe-left));
+        padding-right: max(20px, var(--safe-right));
         overflow-x: hidden;
     }
 
-    /* Vitrola da Home: Contida para nunca ultrapassar 100% da tela */
+    .shelf-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    /* Encartes e Top 5 em 2 colunas proporcionais com espaçamento */
+    .encartes-5col-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .top-five-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    /* Vitrola da Home */
     .hero-turntable-stage {
         width: 240px;
         height: 240px;
@@ -4071,11 +4156,11 @@ body {
         transform: translateX(28px) !important;
     }
 
-    /* Gatefold e Encartes */
+    /* Gatefold */
     .gatefold-card-box {
         grid-template-columns: 1fr;
-        padding: 16px;
-        gap: 16px;
+        padding: 18px;
+        gap: 18px;
     }
 
     .gatefold-left-cover {
@@ -4083,24 +4168,13 @@ body {
         margin: 0 auto;
     }
 
-    .encartes-5col-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-
-    .top-five-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-
-    /* 🎯 MODAL DE AVALIAÇÃO MOBILE (Scroll suave com botão de salvar sempre acessível) */
+    /* Modal de Avaliação Mobile */
     .logging-modal-box {
         width: 100%;
         max-width: 100%;
         height: 92vh;
         height: 92dvh;
-        max-height: 92dvh;
-        padding: 14px;
+        padding: 16px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -4111,9 +4185,8 @@ body {
         flex: 1;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
-        padding-right: 2px;
-        padding-bottom: 24px;
-        gap: 14px;
+        padding-bottom: 28px;
+        gap: 16px;
     }
 
     .modal-album-spotlight {
@@ -4122,33 +4195,32 @@ body {
     }
 
     .modal-album-spotlight img {
-        width: 100px;
-        height: 100px;
+        width: 110px;
+        height: 110px;
     }
 
     .modal-side-actions {
         flex-direction: row;
         flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 8px;
+        gap: 8px;
+        margin-top: 10px;
         width: 100%;
     }
 
     .modal-studio-action-btn {
         flex: 1;
         min-width: 130px;
-        padding: 6px 8px;
-        font-size: 0.68rem;
+        padding: 8px 10px;
+        font-size: 0.7rem;
         justify-content: center;
     }
 
     .modal-review-inputs {
         flex: none;
         width: 100%;
-        overflow: visible;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 14px;
     }
 
     .tracklist-wrapper {
@@ -4160,16 +4232,15 @@ body {
         width: 60px;
     }
 
-    /* Botão de Gravar destacado e com margem segura para o polegar */
     .btn-save-review {
         margin-top: 10px;
-        padding: 12px;
+        padding: 13px;
         font-size: 0.85rem;
     }
 
     /* Player Fixo */
     .studio-player-bar {
-        padding: 8px 12px;
+        padding: 8px 16px;
         top: 56px;
     }
 
@@ -4186,11 +4257,11 @@ body {
         display: none;
     }
 
-    /* Toasts em tela cheia na base */
+    /* Toasts */
     .toast-container {
-        left: 12px;
-        right: 12px;
-        bottom: max(14px, var(--safe-bottom));
+        left: 16px;
+        right: 16px;
+        bottom: max(16px, var(--safe-bottom));
     }
 
     .toast {
@@ -4221,27 +4292,29 @@ body {
     }
 
     .hero-turntable-stage {
-        width: 260px;
-        height: 260px;
+        width: 250px;
+        height: 250px;
     }
 
     .hero-vinyl-disc {
-        width: 240px;
-        height: 240px;
-        transform: translateX(20px);
+        width: 230px;
+        height: 230px;
+        transform: translateX(18px);
     }
 
     .hero-turntable-stage:hover .hero-vinyl-disc,
     .hero-vinyl-disc.vinyl-playing {
-        transform: translateX(36px);
+        transform: translateX(30px);
     }
 
+    /* Mantém 2 colunas elegantes mesmo em telas pequenas (sem gigantismo de 1 coluna) */
     .encartes-5col-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
 
     .top-five-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
 }
-
