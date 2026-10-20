@@ -1414,6 +1414,7 @@ async function openAlbumModal(collectionId, editDbId = null, readOnly = false) {
     stopAudio();
     editingReviewId = editDbId;
     if (reviewModal) reviewModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // <-- ADICIONE ESTA LINHA
     if (modalTracklist) modalTracklist.innerHTML = `<p style="color: #9E958E; padding: 10px;">Carregando lista de faixas do álbum...</p>`;
     if (calculatedAvgBadge) calculatedAvgBadge.textContent = 'Média das Faixas: --';
 
@@ -4357,6 +4358,7 @@ if (closeModalBtn) {
     closeModalBtn.addEventListener('click', () => {
         stopAudio();
         if (reviewModal) reviewModal.classList.add('hidden');
+        document.body.style.overflow = '';
         editingReviewId = null;
     });
 }
