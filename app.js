@@ -1,6 +1,6 @@
 // ============================================================================
-// AFTERPLAY — MOTOR PRINCIPAL DO ESTÚDIO (app.js) // PARTE 1 DE 2
-// Release 5.0: Obsidian & Tube Amp Edition (Vercel & Mobile Ready)
+// AFTERPLAY — MOTOR PRINCIPAL DO ESTÚDIO (app.js) // PARTE 1 DE 3
+// Release 6.0: Obsidian & Tube Amp Edition (Vercel & Mobile Ready)
 // ============================================================================
 
 // --- 1. ESTADO GLOBAL DO ESTÚDIO ---
@@ -11,6 +11,10 @@ let wantToListen = [];
 let topFiveAlbums = [null, null, null, null, null];
 let collections = [];
 let challengeGoal = 50;
+
+// Estado da Faixa de Assinatura & Top Faixas (Release 6.0)
+let userThemeSong = null;
+let isThemeSongPlaying = false;
 
 // Estados de Operação da Interface
 let currentAlbumInModal = null;
@@ -127,6 +131,16 @@ const diarySection = document.getElementById('diarySection');
 const wantGrid = document.getElementById('wantGrid');
 const collectionsGrid = document.getElementById('collectionsGrid');
 const topFiveGrid = document.getElementById('topFiveGrid');
+
+// Novos Seletores de Perfil (Theme Song & Top 10 Faixas)
+const changeThemeSongBtn = document.getElementById('changeThemeSongBtn');
+const themeSongCardContainer = document.getElementById('themeSongCardContainer');
+const themeSongSelectModal = document.getElementById('themeSongSelectModal');
+const closeThemeSongSelectBtn = document.getElementById('closeThemeSongSelectBtn');
+const themeSongSearchInput = document.getElementById('themeSongSearchInput');
+const themeSongSearchBtn = document.getElementById('themeSongSearchBtn');
+const themeSongResultsList = document.getElementById('themeSongResultsList');
+const topTenTracksContainer = document.getElementById('topTenTracksContainer');
 
 const diaryCount = document.getElementById('diaryCount');
 const wantCount = document.getElementById('wantCount');
@@ -391,6 +405,7 @@ if (logoutBtn) {
             wantToListen = [];
             collections = [];
             topFiveAlbums = [null, null, null, null, null];
+            userThemeSong = null;
             
             if (authModal) authModal.classList.add('hidden');
             lockAppInterface();
@@ -619,7 +634,8 @@ if (gateSubmitBtn) {
                     id: currentUser.id,
                     display_name: name || email.split('@')[0],
                     challenge_goal: 50,
-                    top_five: [null, null, null, null, null]
+                    top_five: [null, null, null, null, null],
+                    theme_song: null
                 });
 
                 showToast({ title: "Conta Criada!", message: "Acesso liberado ao estúdio.", type: "success" });
@@ -654,13 +670,20 @@ async function loadAllUserDataFromSupabase() {
     if (!currentUser) return;
 
     try {
-        // 1. Perfil & Vitrine de Honra
+        // 1. Perfil, Vitrine de Honra & Faixa de Identidade (Theme Song)
         const profiles = await executeSupabaseQuery('profiles', 'SELECT', null, `id=eq.${currentUser.id}`);
         if (profiles && profiles.length > 0) {
             const profile = profiles[0];
             challengeGoal = profile.challenge_goal || 50;
             topFiveAlbums = profile.top_five && Array.isArray(profile.top_five) ? profile.top_five : [null, null, null, null, null];
             while (topFiveAlbums.length < 5) topFiveAlbums.push(null);
+
+            // Carrega Faixa de Assinatura se existir
+            if (profile.theme_song) {
+                userThemeSong = typeof profile.theme_song === 'string' ? JSON.parse(profile.theme_song) : profile.theme_song;
+            } else {
+                userThemeSong = null;
+            }
         }
 
         // 2. Avaliações com Track Ratings persistentes
@@ -1027,6 +1050,7 @@ function setVisualScore(score) {
     selectedVisualScore = parseFloat(score);
     updateStarFills(selectedVisualScore);
     if (displayScoreText) displayScoreText.textContent = `${selectedVisualScore.toFixed(1)} ★`;
+    saveDraftSession();
 }
 
 function updateStarFills(targetScore) {
@@ -1410,11 +1434,11 @@ window.addEventListener('keydown', (e) => {
 });
 
 // --- 13. MODAL DE AVALIAÇÃO FAIXA A FAIXA (LEITURA & EDIÇÃO) ---
-async function openAlbumModal(collectionId, editDbId = null, readOnly = false) {
+async function openAlbumModal(collectionId, editDbId = null, readOnly = false, injectedDraft = null) {
     stopAudio();
     editingReviewId = editDbId;
     if (reviewModal) reviewModal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // <-- ADICIONE ESTA LINHA
+    document.body.style.overflow = 'hidden';
     if (modalTracklist) modalTracklist.innerHTML = `<p style="color: #9E958E; padding: 10px;">Carregando lista de faixas do álbum...</p>`;
     if (calculatedAvgBadge) calculatedAvgBadge.textContent = 'Média das Faixas: --';
 
@@ -1425,7 +1449,10 @@ async function openAlbumModal(collectionId, editDbId = null, readOnly = false) {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                 <span>Fechar Ficha Técnica</span>
             `;
-            saveReviewBtn.onclick = () => { if (reviewModal) reviewModal.classList.add('hidden'); };
+            saveReviewBtn.onclick = () => { 
+                if (reviewModal) reviewModal.classList.add('hidden'); 
+                document.body.style.overflow = '';
+            };
         }
     } else if (editingReviewId !== null) {
         if (modalModeTag) modalModeTag.textContent = 'STUDIO LOGGING CONSOLE // RE-MIXANDO SESSÃO';
@@ -1472,7 +1499,13 @@ async function openAlbumModal(collectionId, editDbId = null, readOnly = false) {
         if (modalArtistYear) modalArtistYear.textContent = `${currentAlbumInModal.artist} • ${currentAlbumInModal.year}`;
 
         let savedTrackRatings = {};
-        if (editingReviewId !== null) {
+        if (injectedDraft) {
+            if (reviewTextInput) reviewTextInput.value = injectedDraft.reviewText || '';
+            selectedFavTrack = injectedDraft.favTrack || 'Nenhuma selecionada';
+            setVisualScore(injectedDraft.score || 4.0);
+            resetVibePicker(injectedDraft.vibes || []);
+            savedTrackRatings = injectedDraft.trackRatings || {};
+        } else if (editingReviewId !== null) {
             const existing = diaryReviews.find(r => String(r.dbId) === String(editingReviewId) || String(r.id) === String(collectionId));
             if (existing) {
                 if (reviewTextInput) reviewTextInput.value = existing.reviewText;
@@ -1590,12 +1623,14 @@ async function openAlbumModal(collectionId, editDbId = null, readOnly = false) {
                             }
                         }
                         recalculateTrackAverageFromFaders();
+                        saveDraftSession();
                     });
 
                     favBtn.addEventListener('click', () => {
                         selectFavoriteTrack(favBtn, track.trackName);
                         document.querySelectorAll('.peak-led-indicator').forEach(l => l.classList.remove('active'));
                         led.classList.add('active');
+                        saveDraftSession();
                     });
                 }
 
@@ -1618,6 +1653,12 @@ async function openAlbumModal(collectionId, editDbId = null, readOnly = false) {
         console.error(error);
         if (modalTracklist) modalTracklist.innerHTML = `<p style="color: #E11D48;">Erro ao carregar faixas.</p>`;
     }
+}
+
+if (reviewTextInput) {
+    reviewTextInput.addEventListener('input', () => {
+        saveDraftSession();
+    });
 }
 
 function selectFavoriteTrack(btnElement, trackName) {
@@ -1720,6 +1761,7 @@ async function saveReviewHandler() {
 
             if (updateRes && updateRes.error) throw new Error(updateRes.error.message || "Erro no banco");
 
+            clearDraftSession();
             showToast({ title: "Sessão Atualizada", message: "Notas por faixa e resenha regravadas.", type: "success" });
         } else {
             const newReviewPayload = {
@@ -1743,7 +1785,7 @@ async function saveReviewHandler() {
             }
 
             await executeSupabaseQuery('want_to_listen', 'DELETE', null, `user_id=eq.${currentUser.id}&album_id=eq.${currentAlbumInModal.id}`);
-
+            clearDraftSession();
             showToast({
                 title: "Disco Catalogado!",
                 message: `"${currentAlbumInModal.title}" gravado com sucesso.`,
@@ -1754,6 +1796,7 @@ async function saveReviewHandler() {
         await loadAllUserDataFromSupabase();
         stopAudio();
         if (reviewModal) reviewModal.classList.add('hidden');
+        document.body.style.overflow = '';
         editingReviewId = null;
 
     } catch (err) {
@@ -1785,10 +1828,110 @@ async function deleteDiaryReview(dbId, title) {
     }
 }
 
-// ============================================================================
-// AFTERPLAY — MOTOR PRINCIPAL DO ESTÚDIO (app.js) // PARTE 2 DE 2
-// Release 5.0: Obsidian & Tube Amp Edition (Vercel & Mobile Ready)
-// ============================================================================
+// --- SISTEMA DE PERSISTÊNCIA DE RASCUNHO (RELEASE 6.0 // MARCO 1) ---
+const DRAFT_STORAGE_KEY = 'afterplay_active_draft_session';
+
+function saveDraftSession() {
+    if (!currentAlbumInModal || !currentUser) return;
+
+    const trackRatingsMap = {};
+    const faders = document.querySelectorAll('.console-fader');
+    faders.forEach(f => {
+        const tName = f.dataset.trackName;
+        const val = parseFloat(f.value);
+        if (tName && val > 0) {
+            trackRatingsMap[tName] = val;
+        }
+    });
+
+    const draftData = {
+        album: currentAlbumInModal,
+        score: selectedVisualScore,
+        favTrack: selectedFavTrack,
+        vibes: selectedVibes,
+        reviewText: reviewTextInput ? reviewTextInput.value : '',
+        trackRatings: trackRatingsMap,
+        savedAt: new Date().toISOString()
+    };
+
+    try {
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+        renderPendingDraftBanner();
+    } catch (e) {
+        console.warn("Falha ao salvar rascunho local:", e);
+    }
+}
+
+function clearDraftSession() {
+    try {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+        renderPendingDraftBanner();
+    } catch (e) {
+        console.warn("Falha ao limpar rascunho:", e);
+    }
+}
+
+function getDraftSession() {
+    try {
+        const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function renderPendingDraftBanner() {
+    const container = document.getElementById('pendingDraftWrapper');
+    if (!container) return;
+
+    const draft = getDraftSession();
+    if (!draft || !draft.album) {
+        container.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+    }
+
+    container.classList.remove('hidden');
+    container.innerHTML = `
+        <div class="draft-tape-banner">
+            <div class="draft-tape-left">
+                <div class="draft-thumb-wrap">
+                    <img src="${draft.album.cover}" alt="${sanitize(draft.album.title)}" loading="lazy">
+                </div>
+                <div class="draft-meta-text">
+                    <span class="draft-eyebrow">
+                        <span class="draft-rec-blink"></span>
+                        // SESSÃO PAUSADA NA FITA
+                    </span>
+                    <div class="draft-album-title" title="${sanitize(draft.album.title)}">${sanitize(draft.album.title)}</div>
+                    <div class="draft-subline">${sanitize(draft.album.artist)} · Nota Atual: ${draft.score.toFixed(1)} ★</div>
+                </div>
+            </div>
+            <div class="draft-actions-right">
+                <button type="button" class="btn-discard-draft" onclick="discardDraftHandler()">
+                    Descartar
+                </button>
+                <button type="button" class="btn-resume-draft" onclick="resumeDraftHandler()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <span>Retomar Mixagem</span>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+window.discardDraftHandler = function() {
+    if (confirm("Deseja descartar as notas e impressões desta audição pausada?")) {
+        clearDraftSession();
+        showToast({ title: "Fita Limpa", message: "Rascunho de sessão descartado.", type: "info" });
+    }
+};
+
+window.resumeDraftHandler = function() {
+    const draft = getDraftSession();
+    if (!draft || !draft.album) return;
+    openAlbumModal(draft.album.id, null, false, draft);
+};
 
 // --- 14. WANT TO LISTEN & MODO CRATE DIGGING ---
 async function addToWantList(collectionId) {
@@ -2589,7 +2732,7 @@ function renderCollections() {
     });
 }
 
-// --- 18. DESAFIO & ANALYTICS ---
+// --- 18. DESAFIO, ANALYTICS, THEME SONG & TOP 10 FAIXAS ---
 function renderListeningChallenge() {
     if (!challengeHeadline || !progressBarFill || !challengePercentText) return;
     const currentYear = new Date().getFullYear();
@@ -2642,6 +2785,288 @@ if (editGoalBtn) {
             renderListeningChallenge();
             showToast({ title: "Meta Atualizada", message: `Novo objetivo: ${challengeGoal} álbuns.`, type: "success" });
         }
+    });
+}
+
+// 🎯 RECURSO 1: FAIXA DE IDENTIDADE DO OUVINTE (THEME SONG)
+function renderThemeSongCard() {
+    if (!themeSongCardContainer) return;
+    themeSongCardContainer.innerHTML = '';
+
+    if (!userThemeSong || !userThemeSong.trackName) {
+        themeSongCardContainer.innerHTML = `
+            <div class="theme-song-empty-box">
+                <p>// NENHUMA FAIXA DE IDENTIDADE DEFINIDA PARA ESTE PERFIL.</p>
+                <button type="button" class="btn-secondary-action" onclick="openThemeSongModal()">
+                    + Escolher Faixa de Assinatura
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    const isPlayingThis = (currentPlayingPreviewUrl === userThemeSong.previewUrl && afterplayAudio && !afterplayAudio.paused);
+
+    themeSongCardContainer.innerHTML = `
+        <div class="theme-song-banner">
+            <div class="theme-song-left">
+                <div class="theme-song-cover-box">
+                    <img src="${userThemeSong.cover}" alt="${sanitize(userThemeSong.trackName)}" loading="lazy">
+                    ${userThemeSong.previewUrl ? `
+                        <button type="button" class="theme-song-play-overlay ${isPlayingThis ? 'playing' : ''}" id="themeSongPlayBtn" onclick="toggleThemeSongPlayback()" title="Ouvir Faixa de Identidade">
+                            ${isPlayingThis ? '⏸' : '▶'}
+                        </button>
+                    ` : ''}
+                </div>
+                <div class="theme-song-meta">
+                    <span class="theme-song-tagline">
+                        <span class="needle-vu-dot"></span>
+                        // FAIXA DE IDENTIDADE · MASTER PULSE
+                    </span>
+                    <div class="theme-song-title" title="${sanitize(userThemeSong.trackName)}">${sanitize(userThemeSong.trackName)}</div>
+                    <div class="theme-song-artist">${sanitize(userThemeSong.artistName)} · ${sanitize(userThemeSong.albumTitle || '')}</div>
+                </div>
+            </div>
+            <div class="draft-actions-right">
+                <button type="button" class="btn-discard-draft" onclick="removeThemeSongHandler()" title="Remover Faixa">
+                    Remover
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+window.toggleThemeSongPlayback = function() {
+    if (!userThemeSong || !userThemeSong.previewUrl) return;
+    const playBtn = document.getElementById('themeSongPlayBtn');
+    togglePlayPreview(userThemeSong.previewUrl, `${userThemeSong.trackName} — ${userThemeSong.artistName}`, playBtn);
+    setTimeout(renderThemeSongCard, 100);
+};
+
+window.openThemeSongModal = function() {
+    if (themeSongSelectModal) themeSongSelectModal.classList.remove('hidden');
+    if (themeSongSearchInput) {
+        themeSongSearchInput.value = '';
+        setTimeout(() => themeSongSearchInput.focus(), 100);
+    }
+    renderThemeSongQuickSuggestions();
+};
+
+function renderThemeSongQuickSuggestions() {
+    if (!themeSongResultsList) return;
+    themeSongResultsList.innerHTML = '';
+
+    // Sugere faixas favoritadas nas sessões já gravadas pelo usuário
+    const ratedFavs = diaryReviews.filter(r => r.favTrack && r.favTrack !== 'Nenhuma selecionada');
+
+    if (ratedFavs.length > 0) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'font-size: 0.72rem; color: var(--amber-glow); font-family: "Space Mono", monospace; margin-bottom: 8px;';
+        hint.textContent = '// SUAS FAIXAS FAVORITAS DAS SESSÕES GRAVADAS:';
+        themeSongResultsList.appendChild(hint);
+
+        ratedFavs.slice(0, 8).forEach(r => {
+            const item = document.createElement('div');
+            item.className = 'choice-item-btn';
+            item.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
+                    <img src="${r.cover}" alt="${sanitize(r.title)}" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover; flex-shrink: 0;">
+                    <div style="min-width: 0;">
+                        <strong style="display: block; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${sanitize(r.favTrack)}</strong>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">${sanitize(r.artist)} · ${sanitize(r.title)}</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-evaluate" style="width: auto; padding: 6px 12px;">Definir</button>
+            `;
+
+            item.onclick = async () => {
+                // Tenta buscar previewUrl na API do iTunes para esta música favorita
+                try {
+                    const searchRes = await fetchFromiTunes(`https://itunes.apple.com/search?term=${encodeURIComponent(r.favTrack + ' ' + r.artist)}&entity=song&limit=1`);
+                    let songPreview = null;
+                    if (searchRes.results && searchRes.results.length > 0) {
+                        songPreview = searchRes.results[0].previewUrl || null;
+                    }
+
+                    await saveThemeSongSelection({
+                        trackName: r.favTrack,
+                        artistName: r.artist,
+                        albumTitle: r.title,
+                        cover: r.cover,
+                        previewUrl: songPreview
+                    });
+                } catch (e) {
+                    await saveThemeSongSelection({
+                        trackName: r.favTrack,
+                        artistName: r.artist,
+                        albumTitle: r.title,
+                        cover: r.cover,
+                        previewUrl: null
+                    });
+                }
+            };
+            themeSongResultsList.appendChild(item);
+        });
+    } else {
+        themeSongResultsList.innerHTML = `<p style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 20px 0;">Utilize a busca acima para encontrar qualquer faixa no acervo global.</p>`;
+    }
+}
+
+async function searchGlobalThemeSongs() {
+    if (!themeSongSearchInput || !themeSongResultsList) return;
+    const term = themeSongSearchInput.value.trim();
+    if (!term) return;
+
+    themeSongResultsList.innerHTML = `<p style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 20px 0;">Sintonizando faixas na gravadora...</p>`;
+
+    try {
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=12`;
+        const data = await fetchFromiTunes(url);
+
+        if (!data.results || data.results.length === 0) {
+            themeSongResultsList.innerHTML = `<p style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 20px 0;">Nenhuma faixa encontrada para "${sanitize(term)}".</p>`;
+            return;
+        }
+
+        themeSongResultsList.innerHTML = '';
+        data.results.forEach(song => {
+            const highCover = song.artworkUrl100 ? song.artworkUrl100.replace('100x100bb', '300x300bb') : 'https://via.placeholder.com/300';
+            const item = document.createElement('div');
+            item.className = 'choice-item-btn';
+            item.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
+                    <img src="${highCover}" alt="${sanitize(song.trackName)}" style="width: 38px; height: 38px; border-radius: 4px; object-fit: cover; flex-shrink: 0;">
+                    <div style="min-width: 0;">
+                        <strong style="display: block; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${sanitize(song.trackName)}</strong>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">${sanitize(song.artistName)} · ${sanitize(song.collectionName)}</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-evaluate" style="width: auto; padding: 6px 12px;">Definir</button>
+            `;
+
+            item.onclick = async () => {
+                await saveThemeSongSelection({
+                    trackName: song.trackName,
+                    artistName: song.artistName,
+                    albumTitle: song.collectionName,
+                    cover: highCover,
+                    previewUrl: song.previewUrl || null
+                });
+            };
+
+            themeSongResultsList.appendChild(item);
+        });
+
+    } catch (e) {
+        console.error("Falha ao buscar faixa temática:", e);
+        themeSongResultsList.innerHTML = `<p style="color: var(--crimson-rec); font-size: 0.82rem; text-align: center; padding: 20px 0;">Erro na pesquisa global.</p>`;
+    }
+}
+
+async function saveThemeSongSelection(songData) {
+    if (!currentUser) return;
+    try {
+        await executeSupabaseQuery('profiles', 'UPDATE', { theme_song: songData }, `id=eq.${currentUser.id}`);
+        userThemeSong = songData;
+        if (themeSongSelectModal) themeSongSelectModal.classList.add('hidden');
+        renderThemeSongCard();
+        showToast({
+            title: "Faixa de Identidade Consagrada!",
+            message: `"${songData.trackName}" é agora a assinatura do seu perfil.`,
+            type: "success"
+        });
+    } catch (e) {
+        console.error(e);
+        showToast({ title: "Falha ao Salvar", message: e.message || "Erro no Supabase.", type: "favorite" });
+    }
+}
+
+window.removeThemeSongHandler = async function() {
+    if (!currentUser) return;
+    if (confirm("Deseja retirar a sua faixa de identidade do perfil?")) {
+        try {
+            await executeSupabaseQuery('profiles', 'UPDATE', { theme_song: null }, `id=eq.${currentUser.id}`);
+            userThemeSong = null;
+            stopAudio();
+            renderThemeSongCard();
+            showToast({ title: "Faixa Removida", message: "Espaço de identidade limpo.", type: "info" });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+};
+
+if (changeThemeSongBtn) changeThemeSongBtn.addEventListener('click', openThemeSongModal);
+if (closeThemeSongSelectBtn) closeThemeSongSelectBtn.addEventListener('click', () => {
+    if (themeSongSelectModal) themeSongSelectModal.classList.add('hidden');
+});
+if (themeSongSearchBtn) themeSongSearchBtn.addEventListener('click', searchGlobalThemeSongs);
+if (themeSongSearchInput) {
+    themeSongSearchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchGlobalThemeSongs();
+    });
+}
+
+// 🎯 RECURSO 2: TOP 10 FAIXAS MAIS BEM AVALIADAS NOS FADERS
+function renderTopTenTracks() {
+    if (!topTenTracksContainer) return;
+    topTenTracksContainer.innerHTML = '';
+
+    const allRatedTracks = [];
+
+    diaryReviews.forEach(rev => {
+        if (rev.trackRatings && typeof rev.trackRatings === 'object') {
+            Object.entries(rev.trackRatings).forEach(([tName, score]) => {
+                const numericScore = parseFloat(score);
+                if (numericScore > 0) {
+                    allRatedTracks.push({
+                        trackName: tName,
+                        score: numericScore,
+                        albumTitle: rev.title,
+                        artist: rev.artist,
+                        cover: rev.cover,
+                        albumId: rev.id
+                    });
+                }
+            });
+        }
+    });
+
+    if (allRatedTracks.length === 0) {
+        topTenTracksContainer.innerHTML = `
+            <div class="top-track-empty-card">
+                // O CONSOLE DE FADERS AINDA NÃO POSSUI REGISTROS SUFICIENTES.<br>
+                Ajuste os potenciômetros faixa a faixa ao gravar suas próximas sessões para tabular seu Top 10.
+            </div>
+        `;
+        return;
+    }
+
+    // Ordena da maior para a menor nota
+    allRatedTracks.sort((a, b) => b.score - a.score);
+    const topTen = allRatedTracks.slice(0, 10);
+
+    topTen.forEach((tr, idx) => {
+        const rankNum = String(idx + 1).padStart(2, '0');
+        const row = document.createElement('div');
+        row.className = 'top-track-row';
+        row.innerHTML = `
+            <div class="top-track-left">
+                <span class="top-track-rank">#${rankNum}</span>
+                <img src="${tr.cover}" alt="${sanitize(tr.trackName)}" class="top-track-thumb" loading="lazy">
+                <div class="top-track-info">
+                    <span class="top-track-name" title="${sanitize(tr.trackName)}">${sanitize(tr.trackName)}</span>
+                    <span class="top-track-sub">${sanitize(tr.artist)} · ${sanitize(tr.albumTitle)}</span>
+                </div>
+            </div>
+            <div class="top-track-right">
+                <span class="top-track-score-pill">★ ${tr.score.toFixed(1)}</span>
+                <button type="button" class="btn-evaluate" style="width: auto; padding: 6px 10px; font-size: 0.7rem;" onclick="openAlbumModal(${tr.albumId})" title="Ver Álbum">
+                    Obra
+                </button>
+            </div>
+        `;
+        topTenTracksContainer.appendChild(row);
     });
 }
 
@@ -2816,6 +3241,8 @@ function renderProfileStats() {
     }
 
     renderTopFive();
+    renderThemeSongCard();
+    renderTopTenTracks();
     renderListeningChallenge();
     renderMusicAnalytics();
 }
@@ -2829,6 +3256,7 @@ function renderAll() {
     renderStudioTelemetry();
     renderGatefoldSpotlight();
     renderHomeEncartesGrid();
+    renderPendingDraftBanner();
 }
 
 // --- 19. CARD STUDIO 3.0 (ALTA FIDELIDADE ANALÓGICA) ---
@@ -3163,9 +3591,8 @@ function drawStudioCard(rev, theme) {
         ctx.font = `700 ${isStory ? '32px' : (isSquare ? '22px' : '26px')} "Space Mono", monospace`;
         ctx.fillText(`[ ${rev.rating.toFixed(1)} / 5.0 ]`, width / 2, cursorY);
 
-        // 🎯 RESPIRO AMPLIADO: Desce a posição da Faixa do Coração para não colar na nota
         if (rev.favTrack && rev.favTrack !== 'Nenhuma selecionada') {
-            cursorY += isStory ? 72 : (isSquare ? 42 : 56); // Aumentado o espaçamento
+            cursorY += isStory ? 72 : (isSquare ? 42 : 56);
             const favText = `♥ Faixa do Coração: ${rev.favTrack}`;
             ctx.font = `600 ${isStory ? '21px' : (isSquare ? '15px' : '18px')} "Space Mono", monospace`;
 
@@ -3309,12 +3736,10 @@ function drawMinimalCard(rev, theme) {
         ctx.font = `500 ${isStory ? '24px' : (isSquare ? '18px' : '20px')} "Space Mono", monospace`;
         ctx.fillText(`${rev.artist} • ${rev.year}`, width / 2, cursorY);
 
-        // ⭐⭐⭐⭐⭐ ESTRELAS MONUMENTAIS VETORIAIS (SEM NOTA NUMÉRICA)
         cursorY += isStory ? 90 : (isSquare ? 50 : 68);
         const starRadius = isStory ? 36 : (isSquare ? 24 : 30);
         renderProminentRatingStars(ctx, rev.rating, width / 2, cursorY, starRadius, isStory ? 20 : 14);
 
-        // 🎯 FAIXA DO CORAÇÃO NO MODO MINIMAL: Respiro ampliado a partir das estrelas
         if (rev.favTrack && rev.favTrack !== 'Nenhuma selecionada') {
             cursorY += starRadius + (isStory ? 55 : (isSquare ? 36 : 46));
             const favText = `♥ Faixa do Coração: ${rev.favTrack}`;
@@ -3883,27 +4308,6 @@ async function runBlindNeedleTuner() {
 
         if (needleFreqDisplay) needleFreqDisplay.textContent = `FM ${randomFreq} MHz · SINAL ESTÁVEL`;
 
-        // Renderiza o cartão de descoberta com layout e botões corrigidos
-        needleResultContainer.classList.remove('hidden');
-        needleResultContainer.innerHTML = `
-            <div class="needle-thumb-wrap">
-                <img src="${cover}" alt="${sanitize(pickedAlbum.collectionName)}" loading="lazy">
-            </div>
-            <div class="needle-info-wrap">
-                <span class="needle-rationale-tag">// SINTONIZADO VIA: ${sanitize(cleanArtistName).toUpperCase()}</span>
-                <div class="needle-album-title" title="${sanitize(pickedAlbum.collectionName)}">${sanitize(pickedAlbum.collectionName)}</div>
-                <div class="needle-album-meta">${sanitize(pickedAlbum.artistName)} · ${year}</div>
-                <div class="needle-controls-row">
-                    <button type="button" class="btn-save-review" onclick="openAlbumModal(${pickedAlbum.collectionId})">
-                        ★ Avaliar Obra
-                    </button>
-                    <button type="button" class="btn-want-needle" onclick="addFromNeedleToWant(${pickedAlbum.collectionId}, '${sanitize(pickedAlbum.collectionName).replace(/'/g, "\\'")}', '${sanitize(pickedAlbum.artistName).replace(/'/g, "\\'")}', '${cover}', '${year}')">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        <span>+ Fila da Vitrola</span>
-                    </button>
-                </div>
-            </div>
-        `;// Renderiza o cartão de descoberta com layout e botões corrigidos
         needleResultContainer.classList.remove('hidden');
         needleResultContainer.innerHTML = `
             <div class="needle-thumb-wrap">
@@ -3943,7 +4347,7 @@ window.addFromNeedleToWant = function(id, title, artist, cover, year) {
     toggleWantToListen({ id, title, artist, cover, year });
 };
 
-// --- 22. COMPONENTES DE ESTÚDIO DA HOME (RELEASE 5.0) ---
+// --- 22. COMPONENTES DE ESTÚDIO DA HOME (RELEASE 6.0) ---
 const heroInteractiveVinyl = document.getElementById('heroInteractiveVinyl');
 const heroPlayheadSpindleBtn = document.getElementById('heroPlayheadSpindleBtn');
 const heroSpindleIcon = document.getElementById('heroSpindleIcon');
@@ -4040,8 +4444,14 @@ if (heroInteractiveVinyl) {
 }
 
 if (afterplayAudio) {
-    afterplayAudio.addEventListener('pause', stopHeroVinylSpin);
-    afterplayAudio.addEventListener('ended', stopHeroVinylSpin);
+    afterplayAudio.addEventListener('pause', () => {
+        stopHeroVinylSpin();
+        renderThemeSongCard();
+    });
+    afterplayAudio.addEventListener('ended', () => {
+        stopHeroVinylSpin();
+        renderThemeSongCard();
+    });
 }
 
 function renderStudioTelemetry() {

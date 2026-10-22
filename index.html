@@ -229,7 +229,7 @@
             </nav>  
 
             <div class="drawer-footer">
-                <span class="drawer-meta-tag">RELEASE 5.0 // OBSIDIAN VAULT</span>
+                <span class="drawer-meta-tag">RELEASE 6.0 // OBSIDIAN VAULT</span>
             </div>
         </aside>
 
@@ -272,7 +272,7 @@
                     <div class="hero-left-col">
                         <div class="hero-badge-row">
                             <span class="hero-rec-indicator"></span>
-                            <span class="hero-meta-badge">STUDIO LOGGING ARCHIVE // V5.0</span>
+                            <span class="hero-meta-badge">STUDIO LOGGING ARCHIVE // V6.0</span>
                         </div>
 
                         <h1 class="hero-main-title">
@@ -353,10 +353,13 @@
                     </div>
                 </div>
 
-                <!-- 4. Vitrine Rápida: Gatefold Spotlight (Disco de Ouro) -->
+                <!-- 4. BANNER DE SESSÃO EM PAUSA / RASCUNHO PENDENTE -->
+                <div id="pendingDraftWrapper" class="hidden" style="margin-bottom: 32px;"></div>
+
+                <!-- 5. Vitrine Rápida: Gatefold Spotlight (Disco de Ouro) -->
                 <div id="gatefoldSpotlightContainer" class="gatefold-spotlight-wrapper"></div>
 
-                <!-- 5. Grid Horizontal de Encartes (Últimas 5 Sessões) -->
+                <!-- 6. Grid Horizontal de Encartes (Últimas 5 Sessões) -->
                 <div class="home-recent-shelf-container">
                     <div class="shelf-header-row">
                         <div>
@@ -584,6 +587,26 @@
 
             <!-- VIEW 6: GABINETE & ESTATÍSTICAS (#/perfil) -->
             <section id="viewProfile" class="spa-view hidden">
+                
+                <!-- 🎯 FAIXA PESSOAL DE ASSINATURA (THEME SONG // ANTHEM) -->
+                <div class="profile-section-block">
+                    <div class="section-title-row">
+                        <div>
+                            <span class="section-title">// FAIXA DE IDENTIDADE DO OUVINTE</span>
+                            <p class="section-subtitle">A música de assinatura que traduz sua frequência e pulso sonoro.</p>
+                        </div>
+                        <button type="button" id="changeThemeSongBtn" class="btn-secondary-action" style="font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            <span>Trocar Faixa</span>
+                        </button>
+                    </div>
+
+                    <div id="themeSongCardContainer" class="theme-song-card-wrapper">
+                        <!-- Renderizado dinamicamente pelo JavaScript -->
+                    </div>
+                </div>
+
+                <!-- VITRINE DE HONRA -->
                 <div class="profile-section-block">
                     <div class="section-title-row">
                         <div>
@@ -602,6 +625,7 @@
                     <div id="topFiveGrid" class="top-five-grid"></div>
                 </div>
 
+                <!-- LISTENING CHALLENGE -->
                 <div class="profile-section-block">
                     <div class="challenge-panel">
                         <div class="challenge-header-row">
@@ -627,6 +651,7 @@
                     </div>
                 </div>
 
+                <!-- CARDS DE ESTATÍSTICAS RÁPIDAS -->
                 <div class="stats-cards-grid">
                     <div class="stat-card">
                         <span class="stat-number" id="statReviews">0</span>
@@ -646,6 +671,19 @@
                     </div>
                 </div>
 
+                <!-- 🎯 TOP 10 FAIXAS MAIS BEM AVALIADAS NOS FADERS -->
+                <div class="profile-section-block">
+                    <div class="section-title-row">
+                        <div>
+                            <span class="section-title">// TOP 10 FAIXAS DE MIXAGEM (MASTER PICKS)</span>
+                            <p class="section-subtitle">As faixas individuais que alcançaram os maiores picos nas suas avaliações de estúdio.</p>
+                        </div>
+                    </div>
+
+                    <div id="topTenTracksContainer" class="top-ten-tracks-grid"></div>
+                </div>
+
+                <!-- GRIDS ANALÍTICOS -->
                 <div class="analytics-panels-grid">
                     <div class="analytics-card">
                         <div class="analytics-header">
@@ -788,6 +826,33 @@
                         </svg>
                         <span>Gravar Sessão</span>
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎯 MODAL EXTRA: SELETOR DA FAIXA DE IDENTIDADE (THEME SONG) -->
+    <div id="themeSongSelectModal" class="modal-overlay hidden" style="z-index: 10000;">
+        <div class="modal-box" style="max-width: 540px;">
+            <div class="modal-header">
+                <span class="studio-tag">// GABINETE · DEFINIR FAIXA DE IDENTIDADE</span>
+                <button type="button" id="closeThemeSongSelectBtn" class="close-search-btn" aria-label="Fechar Modal">✕</button>
+            </div>
+
+            <div style="padding: 10px 0;">
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                    Pesquise uma faixa em todo o catálogo global ou selecione uma favorita das suas sessões gravadas:
+                </p>
+
+                <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                    <input type="text" id="themeSongSearchInput" class="studio-input" placeholder="Buscar música (ex: Wish You Were Here, Creep)..." style="margin-top: 0;">
+                    <button type="button" id="themeSongSearchBtn" class="btn-save-review" style="padding: 9px 16px; margin-top: 0; flex-shrink: 0;">Buscar</button>
+                </div>
+
+                <div id="themeSongResultsList" class="choices-list-scroll" style="max-height: 320px;">
+                    <p style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 20px 0;">
+                        Digite o nome de uma música ou artista para sintonizar...
+                    </p>
                 </div>
             </div>
         </div>

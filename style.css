@@ -1,6 +1,6 @@
 /* ==========================================================================
    AFTERPLAY — DESIGN SYSTEM & FOLHA DE ESTILOS (style.css)
-   Release 5.0: Midnight Vinyl & Tube Amp (Parte 1/2)
+   Release 6.0: Midnight Vinyl & Tube Amp (Parte 1/2)
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -1354,7 +1354,6 @@ body {
     font-size: 0.85rem;
     margin-bottom: 12px;
 }
-
 /* --------------------------------------------------------------------------
    11. CARTÕES DO DIÁRIO & SESSÕES COMPLETAS
    -------------------------------------------------------------------------- */
@@ -2767,6 +2766,244 @@ body {
     align-items: center;
     box-shadow: 0 10px 30px rgba(245, 158, 11, 0.08);
 }
+
+/* --------------------------------------------------------------------------
+   🎯 NOVOS COMPONENTES RELEASE 6.0: THEME SONG & TOP 10 FAIXAS
+   -------------------------------------------------------------------------- */
+/* 1. Card da Faixa de Identidade (Theme Song) */
+.theme-song-card-wrapper {
+    margin-bottom: 24px;
+}
+
+.theme-song-banner {
+    background: linear-gradient(135deg, #171413 0%, #110E0E 100%);
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--amber-glow);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+    transition: border-color 0.2s ease;
+}
+
+.theme-song-banner:hover {
+    border-color: #443934;
+    border-left-color: var(--amber-glow);
+}
+
+.theme-song-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.theme-song-cover-box {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8);
+    background-color: var(--bg-obsidian);
+}
+
+.theme-song-cover-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.theme-song-play-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(13, 11, 11, 0.65);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    color: var(--amber-glow);
+    font-size: 1.1rem;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.theme-song-play-overlay:hover {
+    opacity: 1;
+    transform: scale(1.05);
+    color: #fff;
+}
+
+.theme-song-play-overlay.playing {
+    background: rgba(245, 158, 11, 0.85);
+    color: #0D0B0B;
+    opacity: 1;
+}
+
+.theme-song-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.theme-song-tagline {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--amber-glow);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.5px;
+}
+
+.theme-song-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.theme-song-artist {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.theme-song-empty-box {
+    border: 1px dashed var(--border-subtle);
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    background-color: rgba(23, 20, 19, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-song-empty-box p {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+}
+
+/* 2. Top 10 Faixas Mais Bem Avaliadas */
+.top-ten-tracks-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.top-track-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 10px 14px;
+    transition: all 0.2s ease;
+}
+
+.top-track-row:hover {
+    border-color: #3e3634;
+    background-color: var(--bg-panel-hover);
+}
+
+.top-track-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.top-track-rank {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--amber-glow);
+    width: 24px;
+    flex-shrink: 0;
+}
+
+.top-track-thumb {
+    width: 42px;
+    height: 42px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
+
+.top-track-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.top-track-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.top-track-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.top-track-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.top-track-score-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--amber-glow);
+    background-color: var(--amber-soft);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.top-track-empty-card {
+    border: 1px dashed var(--border-subtle);
+    border-radius: 8px;
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    background-color: rgba(23, 20, 19, 0.4);
+}
+
 /* --------------------------------------------------------------------------
    16. MODAIS GLOBAIS (ESTRUTURA BASE)
    -------------------------------------------------------------------------- */
@@ -2784,6 +3021,8 @@ body {
     padding-top: max(16px, var(--safe-top));
     padding-bottom: max(16px, var(--safe-bottom));
     overflow: hidden;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
 }
 
 .modal-box {
@@ -3961,72 +4200,136 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   20. RESPONSIVIDADE COMPLETA E POLIMENTO MÓVEL (MEDIA QUERIES)
+   BANNER DE SESSÃO PENDENTE / RASCUNHO NA FITA (MARCO 1)
    -------------------------------------------------------------------------- */
-@media (max-width: 900px) {
-    .brand-hero-grid {
-        grid-template-columns: 1fr;
-        gap: 36px;
-        min-height: auto;
-        padding-top: 20px;
-    }
-
-    .hero-main-title {
-        font-size: 2.2rem;
-    }
-
-    .hero-turntable-stage {
-        width: 300px;
-        height: 300px;
-    }
-
-    .hero-vinyl-disc {
-        width: 280px;
-        height: 280px;
-    }
-
-    .gatefold-card-box {
-        grid-template-columns: 1fr;
-    }
-
-    .encartes-5col-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .stats-cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .analytics-panels-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .card-studio-workspace {
-        flex-direction: column;
-    }
-
-    .card-controls-panel {
-        width: 100%;
-    }
+.draft-tape-banner {
+    background: linear-gradient(135deg, rgba(38, 25, 14, 0.85) 0%, rgba(20, 16, 15, 0.95) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    border-left: 4px solid var(--amber-glow);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    animation: fadeInView 0.25s ease-out;
 }
 
-@media (max-width: 860px) {
-    .needle-deck-body {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
+.draft-tape-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
 
-    .needle-action-col {
-        max-width: 100%;
-    }
+.draft-thumb-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
 
-    .needle-result-card {
-        padding: 14px;
-    }
+.draft-thumb-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.draft-meta-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.draft-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--amber-glow);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.draft-rec-blink {
+    width: 7px;
+    height: 7px;
+    background-color: var(--crimson-rec);
+    border-radius: 50%;
+    animation: pulseRec 1.5s infinite ease-in-out;
+}
+
+.draft-album-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 2px 0;
+}
+
+.draft-subline {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+.draft-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.btn-resume-draft {
+    background-color: var(--amber-glow);
+    color: #0D0B0B;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 9px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.btn-resume-draft:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btn-discard-draft {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all 0.2s ease;
+}
+
+.btn-discard-draft:hover {
+    border-color: var(--crimson-rec);
+    color: var(--crimson-rec);
+    background-color: rgba(225, 29, 72, 0.1);
 }
 
 /* --------------------------------------------------------------------------
-   20. RESPONSIVIDADE COMPLETA E POLIMENTO MÓVEL (MEDIA QUERIES)
+   20. RESPONSIVIDADE COMPLETA E POLIMENTO MÓVEL (MEDIA QUERIES UNIFICADAS)
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
     .brand-hero-grid {
@@ -4087,6 +4390,11 @@ body {
 
     .needle-result-card {
         padding: 14px;
+    }
+
+    .theme-song-banner {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 
@@ -4112,7 +4420,7 @@ body {
         font-size: 0.7rem;
     }
 
-    /* Margem lateral geral ampliada para 20px (não cola mais nas bordas) */
+    /* Margem lateral geral fixada em 20px */
     .studio-main-content {
         padding: 20px 20px 100px 20px;
         padding-left: max(20px, var(--safe-left));
@@ -4127,7 +4435,7 @@ body {
         margin-bottom: 16px;
     }
 
-    /* Encartes e Top 5 em 2 colunas proporcionais com espaçamento */
+    /* Encartes e Top 5 em 2 colunas proporcionais */
     .encartes-5col-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
@@ -4257,6 +4565,24 @@ body {
         display: none;
     }
 
+    /* Banner do Rascunho Mobile */
+    .draft-tape-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px;
+    }
+
+    .draft-actions-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .btn-resume-draft {
+        flex: 1;
+        justify-content: center;
+    }
+
     /* Toasts */
     .toast-container {
         left: 16px;
@@ -4284,6 +4610,18 @@ body {
         justify-content: center;
         width: 100%;
     }
+
+    .top-track-row {
+        padding: 8px 10px;
+    }
+
+    .top-track-name {
+        font-size: 0.8rem;
+    }
+
+    .top-track-sub {
+        font-size: 0.68rem;
+    }
 }
 
 @media (max-width: 420px) {
@@ -4307,7 +4645,6 @@ body {
         transform: translateX(30px);
     }
 
-    /* Mantém 2 colunas elegantes mesmo em telas pequenas (sem gigantismo de 1 coluna) */
     .encartes-5col-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
