@@ -2123,21 +2123,28 @@ function renderCrateDigging() {
         const offset = idx - currentCrateIndex;
 
         if (offset < 0) {
-            item.style.transform = `translateX(${offset * 40 - 60}px) translateY(${offset * 4}px) rotateZ(-12deg) scale(${1 + offset * 0.05})`;
-            item.style.opacity = Math.max(0, 1 + offset * 0.4);
-            item.style.zIndex = 10 + offset;
-            item.style.pointerEvents = 'none';
+            // Discos já folheados para a frente: tombam para a frente e esquerda na caixa
+            const xDist = Math.max(-130, offset * 26 - 20);
+            const zDist = Math.min(60, 40 - offset * 12);
+            item.style.transform = `translateX(${xDist}px) translateY(14px) translateZ(${zDist}px) rotateX(-22deg) rotateY(-8deg) scale(${1 + offset * 0.04})`;
+            item.style.opacity = Math.max(0, 1 + offset * 0.35);
+            item.style.zIndex = 40 + offset;
+            item.style.pointerEvents = 'auto';
         } else if (offset === 0) {
-            item.style.transform = `translateX(0px) translateY(0px) rotateZ(0deg) scale(1.05)`;
+            // Disco ativo em foco: erguido da caixa e voltado de frente para o ouvinte
+            item.style.transform = `translateY(-24px) translateZ(85px) rotateX(0deg) scale(1.08)`;
             item.style.opacity = '1';
-            item.style.zIndex = 50;
-            item.style.filter = 'drop-shadow(0 15px 30px rgba(0,0,0,0.9))';
+            item.style.zIndex = 55;
+            item.style.filter = 'drop-shadow(0 20px 40px rgba(0,0,0,0.95)) drop-shadow(0 0 18px rgba(245, 158, 11, 0.28))';
+            item.style.pointerEvents = 'auto';
         } else {
-            const zDistance = -offset * 35;
-            const yOffset = -offset * 14;
-            item.style.transform = `translateZ(${zDistance}px) translateY(${yOffset}px) scale(${1 - offset * 0.04})`;
-            item.style.opacity = Math.max(0.2, 1 - offset * 0.2);
+            // Discos de trás esperando na caixa: inclinados para trás em perspectiva 3D
+            const zDistance = -offset * 32;
+            const yOffset = -offset * 12;
+            item.style.transform = `translateZ(${zDistance}px) translateY(${yOffset}px) rotateX(16deg) scale(${1 - offset * 0.035})`;
+            item.style.opacity = Math.max(0.15, 1 - offset * 0.18);
             item.style.zIndex = 50 - offset;
+            item.style.pointerEvents = 'auto';
         }
 
         item.innerHTML = `<img src="${album.cover}" alt="${sanitize(album.title)}" draggable="false" loading="lazy">`;
