@@ -93,6 +93,7 @@ O Afterplay adota três pilares conceituais de engenharia e design:
 | **Release 1.5** | • MVP de Diário e Avaliações<br>• SPA Hash Router e Navegação por Drawer<br>• Fila Want to Listen e Top 5 Inicial<br>• Card Studio Básico (4:5) |
 | **Release 2.0** | • Rota Dedicada de Busca (`#/busca`)<br>• Integração Deezer para Fotos de Artistas<br>• Discografias Cronológicas Completas<br>• Visualizador Detalhado de Coleções<br>• Dashboard de Métricas (Histograma, Décadas, Ranking)<br>• Afterplay Wrapped (Mensal & Anual em PNG)<br>• Backup JSON e Favicon Oficial |
 | **Release 3.0** | • Audio Experience (Previews de 30s + Mini Player com VU meter)<br>• Listening Moods (Tags de Vibe, Filtros Rápidos & Métricas)<br>• Card Studio 3.0 (Proporções 4:5, 9:16, 1:1)<br>• Pôster Oficial do Top 5 da Vida<br>• Console de Acesso & Sincronização em Nuvem (Supabase Auth / Local-Sync) |
+| **Release 6.0 / Modernization** | • Blindagem contra XSS com DOMPurify e eliminação de inline handlers<br>• Arquitetura Modular em ES Modules (`src/`)<br>• Suporte PWA com Service Worker (`sw.js`) e `manifest.json`<br>• Store Reativa Centralizada e Router Desacoplado<br>• Desacoplamento de variáveis de ambiente (`.env.example`) |
 
 ---
 
@@ -119,7 +120,17 @@ O Afterplay adota três pilares conceituais de engenharia e design:
 afterplay/
 ├── index.html        # Estrutura unificada da SPA, templates de views e modais
 ├── style.css         # Design system completo, variáveis de estúdio, animações e responsividade
-├── app.js            # Motor central (Router, Audio Engine, Canvas Studio, APIs e Cloud Sync)
+├── app.js            # Motor central do estúdio
+├── supabaseClient.js # Cliente de banco e autenticação com Supabase
+├── manifest.json     # Metadados de instalação PWA (Progressive Web App)
+├── sw.js             # Service Worker de cache e modo offline-first
+├── .env.example      # Modelo de variáveis de ambiente para deploy
+├── src/              # Módulos de arquitetura limpa (ES Modules)
+│   ├── utils/        # Sanitização (DOMPurify), Toasts analógicos
+│   ├── services/     # APIs externas (iTunes JSONP, Deezer)
+│   ├── audio/        # Motor de áudio analógico e VU meter
+│   ├── state/        # Store reativa centralizada (Pub/Sub)
+│   └── router.js     # SPA Hash Router desacoplado
 ├── favicon.svg       # Ícone vetorial da marca para a aba do navegador
 ├── favicon.png       # Versão bitmap alternativa do favicon
 └── README.md         # Documentação técnica e guia de desenvolvimento

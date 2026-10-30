@@ -1,0 +1,17 @@
+{
+  "name": "Afterplay — Music Listening Diary",
+  "short_name": "Afterplay",
+  "description": "Diário de bordo e console analógico digital para audição atenta de álbuns.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0D0C0B",
+  "theme_color": "#FF9800",
+  "icons": [
+    {
+      "src": "favicon.png-removebg-preview.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

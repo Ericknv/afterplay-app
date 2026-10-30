@@ -1,11 +1,15 @@
 /* ==========================================================================
    AFTERPLAY — DESIGN SYSTEM & FOLHA DE ESTILOS (style.css)
-   Release 6.0: Midnight Vinyl & Tube Amp (Parte 1/2)
+   Release 6.0: Midnight Vinyl & Tube Amp (CSS Cascade Layers Edition)
    ========================================================================== */
+
+/* Declaração determinística de precedência da cascata */
+@layer tokens, base, layout, components, responsive;
 
 /* --------------------------------------------------------------------------
    1. DESIGN TOKENS (PALETA OBSIDIAN & CONSTANTES ANALÓGICAS)
    -------------------------------------------------------------------------- */
+@layer tokens {
 :root {
     --bg-obsidian: #0D0B0B;        /* Obsidian 950 (Canvas Principal) */
     --bg-panel: #171413;           /* Obsidian 900 (Superfície de Painéis) */
@@ -26,7 +30,9 @@
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
 }
+}
 
+@layer base {
 * {
     margin: 0;
     padding: 0;
@@ -57,6 +63,15 @@ body {
 .hidden {
     display: none !important;
 }
+
+img {
+    background-color: var(--bg-panel);
+    content-visibility: auto;
+    transition: opacity 0.25s ease-in-out;
+}
+}
+
+@layer components {
 
 /* --------------------------------------------------------------------------
    2. CABEÇALHO SUPERIOR FIXO (.studio-header)
@@ -548,6 +563,12 @@ body {
 
 .spa-view.hidden {
     display: none !important;
+}
+
+img {
+    background-color: var(--bg-panel);
+    content-visibility: auto;
+    transition: opacity 0.25s ease-in-out;
 }
 
 @keyframes fadeInView {
@@ -4327,10 +4348,12 @@ body {
     color: var(--crimson-rec);
     background-color: rgba(225, 29, 72, 0.1);
 }
+} /* Fim do @layer components */
 
 /* --------------------------------------------------------------------------
    20. RESPONSIVIDADE COMPLETA E POLIMENTO MÓVEL (MEDIA QUERIES UNIFICADAS)
    -------------------------------------------------------------------------- */
+@layer responsive {
 @media (max-width: 900px) {
     .brand-hero-grid {
         grid-template-columns: 1fr;
@@ -4655,3 +4678,4 @@ body {
         gap: 12px;
     }
 }
+} /* Fim do @layer responsive */

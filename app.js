@@ -274,7 +274,11 @@ const toastContainer = document.getElementById('toastContainer');
 // --- 3. SANITIZAÇÃO RIGOROSA CONTRA XSS ---
 function sanitize(str) {
     if (str === null || str === undefined) return '';
-    return String(str)
+    const safeStr = String(str);
+    if (typeof window !== 'undefined' && window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+        return window.DOMPurify.sanitize(safeStr);
+    }
+    return safeStr
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -1123,7 +1127,14 @@ async function searchAlbums() {
                     const photoUrl = await fetchArtistPhotoFromDeezer(artist.artistName);
                     const avatarContainer = document.getElementById(`avatar-${artist.artistId}`);
                     if (avatarContainer && photoUrl) {
-                        avatarContainer.innerHTML = `<img src="${photoUrl}" alt="${sanitize(artist.artistName)}" onerror="this.onerror=null; this.parentElement.innerHTML='🎙️';">`;
+                        const img = document.createElement('img');
+                        img.src = photoUrl;
+                        img.alt = artist.artistName;
+                        img.onerror = () => {
+                            avatarContainer.textContent = '🎙️';
+                        };
+                        avatarContainer.innerHTML = '';
+                        avatarContainer.appendChild(img);
                     }
                 });
             }
@@ -1214,13 +1225,17 @@ async function loadArtistDiscography(artistId, artistName) {
         }
 
         let allAlbums = data.results.slice(1);
-        const seenTitles = new Set();
-        cachedArtistAlbums = allAlbums.filter(album => {
-            const cleanTitle = album.collectionName.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').trim();
-            if (seenTitles.has(cleanTitle)) return false;
-            seenTitles.add(cleanTitle);
-            return true;
-        });
+        if (typeof window !== 'undefined' && window.AfterplayMetrics && typeof window.AfterplayMetrics.deduplicateAlbums === 'function') {
+            cachedArtistAlbums = window.AfterplayMetrics.deduplicateAlbums(allAlbums);
+        } else {
+            const seenTitles = new Set();
+            cachedArtistAlbums = allAlbums.filter(album => {
+                const cleanTitle = album.collectionName.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').trim();
+                if (seenTitles.has(cleanTitle)) return false;
+                seenTitles.add(cleanTitle);
+                return true;
+            });
+        }
 
         lastSearchResults = cachedArtistAlbums;
         sortAndRenderDiscography();
@@ -2751,24 +2766,30 @@ function renderListeningChallenge() {
     }
 
     if (challengePaceBadge) {
-        const now = new Date();
-        const startOfYear = new Date(now.getFullYear(), 0, 1);
-        const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
-        const expectedCountByNow = Math.round((dayOfYear / 365) * challengeGoal);
-
-        if (completedCount >= challengeGoal) {
-            challengePaceBadge.className = 'pace-badge';
-            challengePaceBadge.textContent = '[ META ATINGIDA ]';
-        } else if (completedCount >= expectedCountByNow) {
-            const diff = completedCount - expectedCountByNow;
-            challengePaceBadge.className = 'pace-badge';
-            challengePaceBadge.textContent = diff === 0 
-                ? '[ NO RITMO EXATO ]' 
-                : `[ +${diff} ${diff === 1 ? 'DISCO' : 'DISCOS'} À FRENTE ]`;
+        if (typeof window !== 'undefined' && window.AfterplayMetrics && typeof window.AfterplayMetrics.calculatePace === 'function') {
+            const pace = window.AfterplayMetrics.calculatePace(completedCount, challengeGoal);
+            challengePaceBadge.className = pace.status === 'behind' ? 'pace-badge behind' : 'pace-badge';
+            challengePaceBadge.textContent = pace.badgeText;
         } else {
-            const diff = expectedCountByNow - completedCount;
-            challengePaceBadge.className = 'pace-badge behind';
-            challengePaceBadge.textContent = `[ ${diff} ${diff === 1 ? 'DISCO' : 'DISCOS'} ATRÁS DO RITMO ]`;
+            const now = new Date();
+            const startOfYear = new Date(now.getFullYear(), 0, 1);
+            const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+            const expectedCountByNow = Math.round((dayOfYear / 365) * challengeGoal);
+
+            if (completedCount >= challengeGoal) {
+                challengePaceBadge.className = 'pace-badge';
+                challengePaceBadge.textContent = '[ META ATINGIDA ]';
+            } else if (completedCount >= expectedCountByNow) {
+                const diff = completedCount - expectedCountByNow;
+                challengePaceBadge.className = 'pace-badge';
+                challengePaceBadge.textContent = diff === 0 
+                    ? '[ NO RITMO EXATO ]' 
+                    : `[ +${diff} ${diff === 1 ? 'DISCO' : 'DISCOS'} À FRENTE ]`;
+            } else {
+                const diff = expectedCountByNow - completedCount;
+                challengePaceBadge.className = 'pace-badge behind';
+                challengePaceBadge.textContent = `[ ${diff} ${diff === 1 ? 'DISCO' : 'DISCOS'} ATRÁS DO RITMO ]`;
+            }
         }
     }
 }

@@ -3,8 +3,12 @@
 // Release 5.0: Obsidian & Tube Amp Edition (Vercel Ready)
 // ============================================================================
 
-const SUPABASE_URL = "https://xxixdmzexaejxpfjtiyx.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_PABER2fGo_z4ech0Pf9ICQ_YfBK3hHq";
+// Configuração desacoplada: suporta injeção por variáveis de ambiente (Vercel / Window) com fallback seguro
+const SUPABASE_URL = (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__.SUPABASE_URL)
+    || "https://xxixdmzexaejxpfjtiyx.supabase.co";
+
+const SUPABASE_ANON_KEY = (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__.SUPABASE_ANON_KEY)
+    || "sb_publishable_PABER2fGo_z4ech0Pf9ICQ_YfBK3hHq";
 
 // Disponibilizado globalmente em window.dbAuth
 window.dbAuth = {

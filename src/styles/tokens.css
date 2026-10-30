@@ -1,0 +1,28 @@
+/**
+ * AFTERPLAY — DESIGN TOKENS (PALETA OBSIDIAN & CONSTANTES ANALÓGICAS)
+ * Tokens de design unificados para temas e componentes do estúdio.
+ */
+
+:root {
+    /* Cores de Superfície e Fundo */
+    --bg-obsidian: #0D0B0B;        /* Obsidian 950 (Canvas Principal) */
+    --bg-panel: #171413;           /* Obsidian 900 (Superfície de Painéis) */
+    --bg-panel-hover: #1F1B1A;     /* Painel iluminado ao passar o cursor */
+    --border-subtle: #262120;      /* Obsidian 800 (Divisórias industriais) */
+    
+    /* Cores de Destaque e Sotaque Analógico */
+    --amber-glow: #F59E0B;         /* Warm Amber (Destaque primário, estrelas, botões) */
+    --amber-soft: rgba(245, 158, 11, 0.12); /* Brilho suave da válvula */
+    --crimson-rec: #E11D48;        /* Crimson Groove (Ponto REC, alertas, favoritas) */
+    
+    /* Tipografia e Textos */
+    --text-primary: #F5F2EB;       /* Cream Paper (Títulos e H1) */
+    --text-secondary: #A8A29E;     /* Tape Gray (Corpo e leitura) */
+    --text-muted: #57534E;         /* Muted Groove (Microcopy e dados técnicos) */
+
+    /* Áreas Seguras (Smartphones e Dispositivos com Notch) */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+}
