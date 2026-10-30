@@ -1,11 +1,11 @@
 // AFTERPLAY — SERVICE WORKER (NETWORK-FIRST COM CACHE FALLBACK)
-const CACHE_NAME = 'afterplay-cache-v3';
+const CACHE_NAME = 'afterplay-cache-v4';
 const STATIC_ASSETS = [
     './',
     './index.html',
-    './style.css?v=6.3',
-    './app.js?v=6.3',
-    './supabaseClient.js?v=6.3',
+    './style.css?v=6.4',
+    './app.js?v=6.4',
+    './supabaseClient.js?v=6.4',
     './manifest.json',
     './favicon.png-removebg-preview.png'
 ];

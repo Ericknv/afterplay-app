@@ -19,7 +19,7 @@
     <!-- DOMPURIFY (BLINDAGEM CONTRA XSS) -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 
-    <link rel="stylesheet" href="style.css?v=6.3">
+    <link rel="stylesheet" href="style.css?v=6.4">
 </head>
 <body>
     <!-- AMBIENT GLOW DINÂMICO (ATMOSFERA DE ESTÚDIO ANALÓGICO) -->
@@ -549,7 +549,6 @@
                     <div class="crate-box-stage">
                         <!-- CAIXA FÍSICA ANALÓGICA DE VINIL (WOODEN CRATE BOX 3D) -->
                         <div class="physical-crate-box" aria-hidden="true">
-                            <div class="crate-back-wall"></div>
                             <div class="crate-side-left"></div>
                             <div class="crate-side-right"></div>
                             <div class="crate-bottom-shadow"></div>
@@ -1158,16 +1157,16 @@
     <audio id="afterplayAudio" preload="none"></audio>
 
     <!-- SCRIPTS MODULARIZADOS COM CACHE BUSTING -->
-    <script src="supabaseClient.js?v=6.3"></script>
-    <script type="module" src="src/utils/metrics.js?v=6.3"></script>
-    <script type="module" src="src/utils/media.js?v=6.3"></script>
-    <script src="app.js?v=6.3"></script>
+    <script src="supabaseClient.js?v=6.4"></script>
+    <script type="module" src="src/utils/metrics.js?v=6.4"></script>
+    <script type="module" src="src/utils/media.js?v=6.4"></script>
+    <script src="app.js?v=6.4"></script>
 
     <!-- REGISTRO DO SERVICE WORKER (PWA OFFLINE-FIRST) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=6.3')
+                navigator.serviceWorker.register('./sw.js?v=6.4')
                     .then(reg => console.log('[Afterplay SW] Ativo e registrado:', reg.scope))
                     .catch(err => console.warn('[Afterplay SW] Falha ao registrar:', err));
             });
