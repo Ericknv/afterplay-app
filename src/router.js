@@ -34,42 +34,50 @@ export class AppRouter {
         }
         const cleanRoute = rawHash.split('?')[0];
 
-        const viewIds = ['viewHome', 'viewSessions', 'viewSearch', 'viewWant', 'viewCollections', 'viewProfile'];
-        viewIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.classList.add('hidden');
-                el.style.display = 'none';
+        const executeTransition = () => {
+            const viewIds = ['viewHome', 'viewSessions', 'viewSearch', 'viewWant', 'viewCollections', 'viewProfile'];
+            viewIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.style.display = 'none';
+                }
+            });
+
+            const activeViewId = this.routes[cleanRoute] || 'viewHome';
+            const activeView = document.getElementById(activeViewId);
+
+            if (activeView) {
+                activeView.classList.remove('hidden');
+                activeView.style.display = 'block';
             }
-        });
 
-        const activeViewId = this.routes[cleanRoute] || 'viewHome';
-        const activeView = document.getElementById(activeViewId);
+            document.querySelectorAll('.drawer-link').forEach(link => {
+                const linkHref = link.getAttribute('href');
+                if (linkHref === cleanRoute) {
+                    link.classList.add('active-route');
+                } else {
+                    link.classList.remove('active-route');
+                }
+            });
 
-        if (activeView) {
-            activeView.classList.remove('hidden');
-            activeView.style.display = 'block';
+            this.closeDrawer();
+            window.scrollTo({ top: 0, behavior: 'instant' });
+
+            this.onRouteChangeCallbacks.forEach(cb => {
+                try {
+                    cb(cleanRoute, activeViewId);
+                } catch (err) {
+                    console.error('[AppRouter] Erro no callback de rota:', err);
+                }
+            });
+        };
+
+        if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+            document.startViewTransition(executeTransition);
+        } else {
+            executeTransition();
         }
-
-        document.querySelectorAll('.drawer-link').forEach(link => {
-            const linkHref = link.getAttribute('href');
-            if (linkHref === cleanRoute) {
-                link.classList.add('active-route');
-            } else {
-                link.classList.remove('active-route');
-            }
-        });
-
-        this.closeDrawer();
-        window.scrollTo({ top: 0, behavior: 'instant' });
-
-        this.onRouteChangeCallbacks.forEach(cb => {
-            try {
-                cb(cleanRoute, activeViewId);
-            } catch (err) {
-                console.error('[AppRouter] Erro no callback de rota:', err);
-            }
-        });
     }
 
     bindDrawerEvents() {

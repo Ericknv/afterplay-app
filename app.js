@@ -879,14 +879,8 @@ vibeFilterChips.forEach(chip => {
     });
 });
 
-// --- 9. SPA HASH ROUTER BLINDADO ---
-function handleRouting() {
-    let rawHash = window.location.hash.trim();
-    if (!rawHash || rawHash === '#' || rawHash === '#/') {
-        rawHash = '#/';
-    }
-    const cleanRoute = rawHash.split('?')[0];
-
+// --- 9. SPA HASH ROUTER BLINDADO COM VIEW TRANSITIONS ---
+function updateViewDOM(cleanRoute) {
     const vHome = document.getElementById('viewHome');
     const vSessions = document.getElementById('viewSessions');
     const vSearch = document.getElementById('viewSearch');
@@ -929,6 +923,21 @@ function handleRouting() {
     if (drawerOverlay) drawerOverlay.classList.add('hidden');
 
     window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function handleRouting() {
+    let rawHash = window.location.hash.trim();
+    if (!rawHash || rawHash === '#' || rawHash === '#/') {
+        rawHash = '#/';
+    }
+    const cleanRoute = rawHash.split('?')[0];
+
+    // Transição suave cinematográfica se suportado pelo navegador
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+        document.startViewTransition(() => updateViewDOM(cleanRoute));
+    } else {
+        updateViewDOM(cleanRoute);
+    }
 }
 
 window.addEventListener('hashchange', handleRouting);
@@ -2206,6 +2215,31 @@ if (crateNextBtn) {
     });
 }
 
+// Suporte tátil (Touch Swipe) para folhear vinis no Crate Digging
+const crateStage = document.querySelector('.crate-box-stage');
+if (crateStage) {
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    crateStage.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    crateStage.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 40) {
+            if (diff > 0 && currentCrateIndex < wantToListen.length - 1) {
+                currentCrateIndex++;
+                renderCrateDigging();
+            } else if (diff < 0 && currentCrateIndex > 0) {
+                currentCrateIndex--;
+                renderCrateDigging();
+            }
+        }
+    }, { passive: true });
+}
+
 // --- 15. GAVETAS & COLEÇÕES ---
 if (openCreateCollectionBtn) {
     openCreateCollectionBtn.addEventListener('click', () => {
@@ -2573,7 +2607,10 @@ function renderDiaryCardHTML(item) {
     const pressDate = formatStudioTimestamp(item.date);
 
     return `
-        <img src="${item.cover}" alt="${sanitize(item.title)}" class="review-cover" style="cursor: pointer;" title="Abrir Ficha Técnica" onclick="openAlbumModal(${item.id}, '${item.dbId}', true)" loading="lazy">
+        <div class="review-cover-wrapper" onclick="openAlbumModal(${item.id}, '${item.dbId}', true)" title="Abrir Ficha Técnica">
+            <div class="vinyl-disc-sleeve" aria-hidden="true"></div>
+            <img src="${item.cover}" alt="${sanitize(item.title)}" class="review-cover" loading="lazy" decoding="async">
+        </div>
         <div class="review-content">
             <div class="studio-press-stamp ${isMasterPress ? 'master-stamp' : ''}">
                 [ LAT: 33 RPM · PRESS: ${pressDate} · SIDE A/B COMPLETE ]
